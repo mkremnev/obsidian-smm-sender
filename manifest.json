@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "telegram-sender",
+	"name": "Telegram Sender",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Send your Obsidian notes to Telegram channels with support for multiple bots and connection testing.",
+	"author": "@mkremnev",
+	"authorUrl": "",
 	"isDesktopOnly": false
 }

@@ -1,8 +1,107 @@
-/*
+/* Telegram Sender Plugin Styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.telegram-bots-container {
+    margin-top: 1rem;
+}
 
-If your plugin does not need CSS, delete this file.
+.telegram-bot-config {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--background-primary-alt);
+}
 
-*/
+.telegram-bot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.telegram-bot-header h4 {
+    margin: 0;
+    color: var(--text-normal);
+}
+
+.telegram-bot-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.telegram-bot-controls button {
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: none;
+}
+
+.telegram-no-bots {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 2rem;
+    background: var(--background-primary-alt);
+    border-radius: 8px;
+    border: 1px dashed var(--background-modifier-border);
+}
+
+/* Bot Selection Modal */
+.telegram-bot-option {
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    background: var(--background-primary);
+}
+
+.telegram-bot-option:hover {
+    background: var(--background-primary-alt);
+    border-color: var(--interactive-accent);
+}
+
+.telegram-bot-chat-id {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+/* Button styling for different states */
+.mod-success {
+    background-color: var(--color-green) !important;
+    color: white !important;
+}
+
+.mod-destructive {
+    background-color: var(--color-red) !important;
+    color: white !important;
+}
+
+.mod-warning {
+    background-color: var(--color-orange) !important;
+    color: white !important;
+}
+
+.mod-cta {
+    background-color: var(--interactive-accent) !important;
+    color: var(--text-on-accent) !important;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .telegram-bot-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .telegram-bot-controls {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
