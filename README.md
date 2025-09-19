@@ -30,7 +30,7 @@ SMM Sender automates the process of sharing your Obsidian notes across various s
 
 ### Manual Installation
 
-1. Download the latest release from the [GitHub releases page](https://github.com/mkremnev/obsidian-telegram-sender/releases)
+1. Download the latest release from the [GitHub releases page](https://github.com/mkremnev/obsidian-smm-sender/releases)
 2. Extract the files to your vault's plugins folder: `{VaultFolder}/.obsidian/plugins/smm-sender/`
 3. The folder should contain: `main.js`, `manifest.json`, and `styles.css`
 4. Restart Obsidian
@@ -114,7 +114,7 @@ The plugin supports various formatting options:
 
 ### Getting Help
 
-- Check the [Issues page](https://github.com/mkremnev/obsidian-telegram-sender/issues) for known problems
+- Check the [Issues page](https://github.com/mkremnev/obsidian-smm-sender/issues) for known problems
 - Create a new issue with detailed information about your problem
 - Join the community discussions for tips and tricks
 
@@ -124,7 +124,7 @@ The plugin supports various formatting options:
 
 ```bash
 # Clone the repository
-git clone https://github.com/mkremnev/obsidian-telegram-sender.git
+git clone https://github.com/mkremnev/obsidian-smm-sender.git
 cd obsidian-telegram-sender
 
 # Install dependencies
