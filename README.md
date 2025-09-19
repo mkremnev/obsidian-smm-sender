@@ -3,6 +3,8 @@
 [![GitHub release](https://img.shields.io/github/v/release/mkremnev/obsidian-smm-sender)](https://github.com/mkremnev/obsidian-smm-sender/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![Demo](docs/project.gif)
+
 A powerful Obsidian plugin that enables you to seamlessly publish your notes to social media channels and messaging platforms directly from your vault.
 
 ## 🎯 Purpose
