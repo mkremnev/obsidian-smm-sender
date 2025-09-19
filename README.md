@@ -1,6 +1,6 @@
 # SMM Sender - Obsidian Plugin
 
-[![GitHub release](https://img.shields.io/github/v/release/mkremnev/obsidian-telegram-sender)](https://github.com/mkremnev/obsidian-telegram-sender/releases)
+[![GitHub release](https://img.shields.io/github/v/release/mkremnev/smm-sender)](https://github.com/mkremnev/smm-sender/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A powerful Obsidian plugin that enables you to seamlessly publish your notes to social media channels and messaging platforms directly from your vault.
