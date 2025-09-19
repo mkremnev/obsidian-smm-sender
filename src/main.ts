@@ -1,14 +1,14 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin } from "obsidian";
 import { DEFAULT_SETTINGS, TelegramSenderSettings, TelegramBot, TelegramSenderSettingTab } from "./settings";
-import { TelegramService } from "./services/telegram-service";
+import { Telegram } from "./services/telegram";
 
 export default class TelegramSenderPlugin extends Plugin {
 	settings: TelegramSenderSettings;
-	telegramService: TelegramService;
+	telegramService: Telegram;
 
 	async onload() {
 		await this.loadSettings();
-		this.telegramService = new TelegramService(this.settings.enableLogging);
+		this.telegramService = new Telegram(this.settings.enableLogging);
 
 		// Add ribbon icon for sending current note to Telegram
 		const ribbonIconEl = this.addRibbonIcon("send", "Send to Telegram", async (evt: MouseEvent) => {
@@ -37,8 +37,101 @@ export default class TelegramSenderPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-		// Update telegram service logging setting
-		this.telegramService = new TelegramService(this.settings.enableLogging);
+		this.telegramService = new Telegram(this.settings.enableLogging);
+	}
+
+	// Метод для получения данных файла в виде Buffer или Blob
+	async getFileData(file: any) {
+		try {
+			const arrayBuffer = await this.app.vault.readBinary(file);
+			return {
+				name: file.name,
+				data: new Uint8Array(arrayBuffer),
+				size: arrayBuffer.byteLength,
+				type: file.extension,
+			};
+		} catch (error) {
+			console.error("Error reading file:", error);
+			return null;
+		}
+	}
+
+	// Новый метод для получения медиа из заметки
+	async getMediaFromNote(file: any) {
+		if (!file) return [];
+
+		const mediaFiles = [];
+
+		// Получаем все ссылки на файлы в заметке
+		const fileCache = this.app.metadataCache.getFileCache(file);
+
+		if (fileCache?.embeds) {
+			// Обрабатываем встроенные файлы (изображения, видео, аудио)
+			for (const embed of fileCache.embeds) {
+				const linkedFile = this.app.metadataCache.getFirstLinkpathDest(embed.link, file.path);
+				if (linkedFile && this.isMediaFile(linkedFile)) {
+					const arrayBuffer = await this.app.vault.readBinary(linkedFile);
+					mediaFiles.push({
+						file: linkedFile,
+						name: linkedFile.name,
+						data: arrayBuffer,
+						type: this.getMediaType(linkedFile.extension),
+					});
+				}
+			}
+		}
+
+		if (fileCache?.links) {
+			// Обрабатываем обычные ссылки на файлы
+			for (const link of fileCache.links) {
+				const linkedFile = this.app.metadataCache.getFirstLinkpathDest(link.link, file.path);
+				if (linkedFile && this.isMediaFile(linkedFile)) {
+					const arrayBuffer = await this.app.vault.readBinary(linkedFile);
+					mediaFiles.push({
+						file: linkedFile,
+						name: linkedFile.name,
+						data: arrayBuffer,
+						type: this.getMediaType(linkedFile.extension),
+					});
+				}
+			}
+		}
+
+		return mediaFiles;
+	}
+
+	// Проверяем, является ли файл медиа
+	isMediaFile(file: any): boolean {
+		const mediaExtensions = [
+			"jpg",
+			"jpeg",
+			"png",
+			"gif",
+			"webp",
+			"bmp",
+			"svg",
+			"mp4",
+			"avi",
+			"mov",
+			"wmv",
+			"mp3",
+			"wav",
+			"ogg",
+			"pdf",
+		];
+		return mediaExtensions.includes(file.extension.toLowerCase());
+	}
+
+	// Определяем тип медиа
+	getMediaType(extension: string): string {
+		const imageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp"];
+		const videoExtensions = ["mp4", "avi", "mov", "wmv"];
+		const audioExtensions = ["mp3", "wav", "ogg"];
+
+		if (imageExtensions.includes(extension.toLowerCase())) return "photo";
+		if (videoExtensions.includes(extension.toLowerCase())) return "video";
+		if (audioExtensions.includes(extension.toLowerCase())) return "audio";
+		return "document";
 	}
 
 	async sendCurrentNoteToTelegram() {
@@ -57,12 +150,21 @@ export default class TelegramSenderPlugin extends Plugin {
 		const noteContent = activeView.editor.getValue();
 		const noteTitle = activeView.file?.basename || "Untitled Note";
 
+		// Получаем все медиа файлы из заметки
+		const mediaFiles = await this.getMediaFromNote(activeView.file);
+		console.log(mediaFiles[0].data);
+
 		// Format message with title
 		const message = `**${noteTitle}**\n\n${noteContent}`;
 
 		if (enabledBots.length === 1) {
 			// Send to the only enabled bot
-			const success = await this.telegramService.sendMessage(enabledBots[0], message);
+			let success: boolean;
+			if (mediaFiles) {
+				success = await this.telegramService.sendMediaFiles(enabledBots[0], mediaFiles, message);
+			} else {
+				success = await this.telegramService.sendMessage(enabledBots[0], message);
+			}
 			if (success) {
 				new Notice(`Note sent to ${enabledBots[0].name}`);
 			}
