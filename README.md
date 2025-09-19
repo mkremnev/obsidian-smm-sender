@@ -1,94 +1,178 @@
-# Obsidian Sample Plugin
+# SMM Sender - Obsidian Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+[![GitHub release](https://img.shields.io/github/v/release/mkremnev/obsidian-telegram-sender)](https://github.com/mkremnev/obsidian-telegram-sender/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+A powerful Obsidian plugin that enables you to seamlessly publish your notes to social media channels and messaging platforms directly from your vault.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## 🎯 Purpose
 
-## First time developing plugins?
+SMM Sender automates the process of sharing your Obsidian notes across various social platforms, making content distribution effortless. Whether you're a content creator, blogger, or just want to share your thoughts with different communities, this plugin streamlines your workflow by eliminating the need to manually copy and format your content for each platform.
 
-Quick starting guide for new plugin devs:
+## ✨ Features
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- **📱 Telegram Integration**: Send notes directly to Telegram channels and chats
+- **🤖 Multiple Bot Support**: Configure and manage multiple bots for different platforms
+- **🔍 Connection Testing**: Verify bot connections before publishing
+- **📝 Message Formatting**: Customize how your notes appear on different platforms
+- **⚙️ Flexible Configuration**: Fine-tune publishing settings for each platform
+- **📱 Cross-Platform**: Works on both desktop and mobile versions of Obsidian
 
-## Releasing new releases
+## 🚀 Installation
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### From Community Plugins (Recommended)
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+1. Open Obsidian Settings
+2. Navigate to **Community Plugins** and disable Safe Mode
+3. Click **Browse** and search for "SMM Sender"
+4. Install the plugin and enable it
+5. Configure your bot tokens in the plugin settings
 
-## Adding your plugin to the community plugin list
+### Manual Installation
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+1. Download the latest release from the [GitHub releases page](https://github.com/mkremnev/obsidian-telegram-sender/releases)
+2. Extract the files to your vault's plugins folder: `{VaultFolder}/.obsidian/plugins/smm-sender/`
+3. The folder should contain: `main.js`, `manifest.json`, and `styles.css`
+4. Restart Obsidian
+5. Enable the plugin in Settings → Community Plugins
 
-## How to use
+## 📖 How to Use
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+### Initial Setup
 
-## Manually installing the plugin
+1. **Configure Telegram Bot**:
+   - Create a new bot via [@BotFather](https://t.me/botfather) on Telegram
+   - Copy your bot token
+   - Get your channel/chat ID (you can use [@userinfobot](https://t.me/userinfobot))
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+2. **Plugin Configuration**:
+   - Go to Settings → SMM Sender
+   - Add your bot token and channel ID
+   - Test the connection using the "Test Connection" button
+   - Configure message formatting preferences
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint ./src/`
+### Publishing Notes
 
-## Funding URL
+1. **Single Note Publishing**:
+   - Open the note you want to publish
+   - Use the command palette (`Ctrl/Cmd + P`)
+   - Search for "SMM Sender: Send to Telegram"
+   - Select your configured bot/channel
 
-You can include funding URLs where people who use your plugin can financially support it.
+2. **Batch Publishing**:
+   - Select multiple notes in the file explorer
+   - Right-click and choose "Send to SMM platforms"
+   - Choose your target platforms
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+3. **Quick Publishing**:
+   - Use the ribbon icon for quick access
+   - Configure default publishing settings for one-click sharing
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+### Message Formatting
+
+The plugin supports various formatting options:
+
+- **Plain Text**: Send notes as simple text messages
+- **Markdown**: Preserve basic markdown formatting
+- **Custom Templates**: Create templates for consistent formatting
+- **Media Support**: Include images and attachments (where supported by the platform)
+
+## ⚙️ Configuration
+
+### Bot Settings
+
+- **Bot Token**: Your Telegram bot API token
+- **Channel ID**: Target channel or chat ID
+- **Default Format**: Choose between plain text, markdown, or HTML
+- **Message Template**: Customize how your notes are formatted
+
+### Advanced Settings
+
+- **Auto-publish**: Automatically publish notes when they're modified
+- **Publish Confirmation**: Require confirmation before publishing
+- **Error Handling**: Configure retry attempts and error notifications
+- **Rate Limiting**: Set delays between multiple publications
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Bot not responding:**
+- Verify your bot token is correct
+- Ensure the bot is added to your target channel
+- Check if the bot has admin permissions (for channels)
+
+**Messages not formatting correctly:**
+- Review your formatting settings
+- Test with a simple note first
+- Check platform-specific formatting limitations
+
+**Connection timeouts:**
+- Verify your internet connection
+- Try increasing timeout settings
+- Check if Telegram API is accessible from your network
+
+### Getting Help
+
+- Check the [Issues page](https://github.com/mkremnev/obsidian-telegram-sender/issues) for known problems
+- Create a new issue with detailed information about your problem
+- Join the community discussions for tips and tricks
+
+## 🛠️ Development
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/mkremnev/obsidian-telegram-sender.git
+cd obsidian-telegram-sender
+
+# Install dependencies
+npm install
+
+# Start development mode
+npm run dev
 ```
 
-If you have multiple URLs, you can also do:
+### Building
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+```bash
+# Build for production
+npm run build
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
-## API Documentation
+### Contributing
 
-See https://github.com/obsidianmd/obsidian-api
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 💖 Support
+
+If you find this plugin helpful, consider supporting its development:
+
+- ⭐ Star this repository
+- 🐛 Report bugs and suggest features
+- ☕ [Buy me a coffee](https://buymeacoffee.com/mxkremnev)
+
+## 🙏 Acknowledgments
+
+- Thanks to the Obsidian team for the excellent plugin API
+- Community contributors and beta testers
+- Telegram Bot API for reliable messaging infrastructure
+
+---
+
+**Made with ❤️ for the Obsidian community**

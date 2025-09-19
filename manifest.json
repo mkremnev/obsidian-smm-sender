@@ -1,10 +1,13 @@
 {
-	"id": "telegram-sender",
-	"name": "Telegram Sender",
-	"version": "1.0.0",
+	"id": "smm-sender",
+	"name": "Smm Sender",
+	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Send your Obsidian notes to Telegram channels with support for multiple bots and connection testing.",
+	"description": "Send your Obsidian notes to socials channels with support for multiple bots and connection testing.",
 	"author": "@mkremnev",
-	"authorUrl": "",
-	"isDesktopOnly": false
+	"authorUrl": "https://github.com/mkremnev",
+	"isDesktopOnly": false,
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://buymeacoffee.com/mxkremnev"
+	}
 }
