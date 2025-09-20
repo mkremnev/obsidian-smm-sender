@@ -225,9 +225,9 @@ export default class TelegramSenderPlugin extends Plugin {
 			new BotSelectionModal(this.app, enabledBots, async (selectedBot: TelegramBot) => {
 				let success: boolean;
 				if (mediaFiles || (Array.isArray(mediaFiles) && mediaFiles?.length)) {
-					success = await this.telegramService.sendMediaFiles(enabledBots[0], mediaFiles, message);
+					success = await this.telegramService.sendMediaFiles(selectedBot, mediaFiles, message);
 				} else {
-					success = await this.telegramService.sendMessage(enabledBots[0], message);
+					success = await this.telegramService.sendMessage(selectedBot, message);
 				}
 				if (success) {
 					new Notice(`Note sent to ${selectedBot.name}`);
