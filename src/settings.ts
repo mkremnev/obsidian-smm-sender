@@ -121,7 +121,14 @@ export class TelegramSenderSettingTab extends PluginSettingTab {
 			new Setting(botContainer)
 				.setName("Chat ID")
 				.setDesc("Channel or chat ID where messages will be sent")
-				.addText((text) => text.setPlaceholder("-1001234567890 or @channelname").setValue(bot.chatId));
+				.addText((text) =>
+					text
+						.setPlaceholder("-1001234567890 or @channelname")
+						.setValue(bot.chatId)
+						.onChange(async (value) => {
+							bot.chatId = value;
+						})
+				);
 
 			new Setting(botContainer)
 				.setName("Enabled")
