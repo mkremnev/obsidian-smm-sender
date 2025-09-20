@@ -1,6 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin } from "obsidian";
 import { DEFAULT_SETTINGS, TelegramSenderSettings, TelegramBot, TelegramSenderSettingTab } from "./settings";
 import { Telegram } from "./services/telegram";
+import { escapeMarkdown } from "./utils/telegram";
 
 export default class TelegramSenderPlugin extends Plugin {
 	settings: TelegramSenderSettings;
@@ -58,7 +59,7 @@ export default class TelegramSenderPlugin extends Plugin {
 
 	// Новый метод для получения медиа из заметки
 	async getMediaFromNote(file: any) {
-		if (!file) return [];
+		if (!file) return false;
 
 		const mediaFiles = [];
 
@@ -134,6 +135,47 @@ export default class TelegramSenderPlugin extends Plugin {
 		return "document";
 	}
 
+	private processMarkdownV2(text: string): string {
+		// Используем плейсхолдеры БЕЗ специальных символов MarkdownV2
+		const protectedText = text
+			// Защищаем жирный текст **text**
+			.replace(/\*\*(.*?)\*\*/g, "XBOLDSTARTX$1XBOLDENDX")
+			// Защищаем курсив *text* (одиночные звездочки)
+			.replace(/(?<!\*)\*(?!\*)([^*]+?)\*(?!\*)/g, "XITALICSTARTX$1XITALICENDX")
+			// Защищаем зачеркнутый текст ~text~
+			.replace(/~(.*?)~/g, "XSTRIKESTARTX$1XSTRIKEENDX")
+			// Защищаем подчеркнутый текст __text__
+			.replace(/__(.*?)__/g, "XUNDERLINESTARTX$1XUNDERLINEENDX")
+			// Защищаем код `code`
+			.replace(/`([^`]+?)`/g, "XCODESTARTX$1XCODEENDX")
+			// Защищаем блоки кода ```code```
+			.replace(/```([\s\S]*?)```/g, "XCODEBLOCKSTARTX$1XCODEBLOCKENDX")
+			// Защищаем ссылки [text](url)
+			.replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, "XLINKSTARTX$1XLINKMIDX$2XLINKENDX");
+
+		// Экранируем все специальные символы
+		const escapedText = escapeMarkdown(protectedText);
+
+		// Восстанавливаем защищенные markdown конструкции
+		return (
+			escapedText
+				// Восстанавливаем жирный текст
+				.replace(/XBOLDSTARTX(.*?)XBOLDENDX/g, "*$1*")
+				// Восстанавливаем курсив
+				.replace(/XITALICSTARTX(.*?)XITALICENDX/g, "_$1_")
+				// Восстанавливаем зачеркнутый
+				.replace(/XSTRIKESTARTX(.*?)XSTRIKEENDX/g, "~$1~")
+				// Восстанавливаем подчеркнутый
+				.replace(/XUNDERLINESTARTX(.*?)XUNDERLINEENDX/g, "__$1__")
+				// Восстанавливаем код
+				.replace(/XCODESTARTX(.*?)XCODEENDX/g, "`$1`")
+				// Восстанавливаем блоки кода
+				.replace(/XCODEBLOCKSTARTX([\s\S]*?)XCODEBLOCKENDX/g, "```$1```")
+				// Восстанавливаем ссылки
+				.replace(/XLINKSTARTX(.*?)XLINKMIDX(.*?)XLINKENDX/g, "[$1]($2)")
+		);
+	}
+
 	async sendCurrentNoteToTelegram() {
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView) {
@@ -150,17 +192,27 @@ export default class TelegramSenderPlugin extends Plugin {
 		const noteContent = activeView.editor.getValue();
 		const noteTitle = activeView.file?.basename || "Untitled Note";
 
-		// Получаем все медиа файлы из заметки
-		const mediaFiles = await this.getMediaFromNote(activeView.file);
-		console.log(mediaFiles[0].data);
+		// Getting all media files from a note
+		const mediaFiles = await this.getMediaFromNote(activeView?.file);
+
+		// Regular expressions for cleaning images
+		const simpleImageRegex = /!\[[^\]]*\]/g; //  ![name_file]
+		const embedImageRegex = /!\[\[[^\]]*\]\]/g; //![[name_file]]
+		const markdownImageRegex = /!\[[^\]]*\]\([^)]*\)/g; // ![alt](path)
+
+		// Format message with title and clean images
+		const cleanContent = noteContent
+			.replace(embedImageRegex, "")
+			.replace(simpleImageRegex, "")
+			.replace(markdownImageRegex, "");
 
 		// Format message with title
-		const message = `**${noteTitle}**\n\n${noteContent}`;
+		const message = `*${noteTitle}*\n${this.processMarkdownV2(cleanContent)}`;
 
 		if (enabledBots.length === 1) {
 			// Send to the only enabled bot
 			let success: boolean;
-			if (mediaFiles) {
+			if (Array.isArray(mediaFiles) && mediaFiles?.length) {
 				success = await this.telegramService.sendMediaFiles(enabledBots[0], mediaFiles, message);
 			} else {
 				success = await this.telegramService.sendMessage(enabledBots[0], message);
@@ -171,7 +223,12 @@ export default class TelegramSenderPlugin extends Plugin {
 		} else {
 			// Show bot selection modal if multiple bots are enabled
 			new BotSelectionModal(this.app, enabledBots, async (selectedBot: TelegramBot) => {
-				const success = await this.telegramService.sendMessage(selectedBot, message);
+				let success: boolean;
+				if (mediaFiles || (Array.isArray(mediaFiles) && mediaFiles?.length)) {
+					success = await this.telegramService.sendMediaFiles(enabledBots[0], mediaFiles, message);
+				} else {
+					success = await this.telegramService.sendMessage(enabledBots[0], message);
+				}
 				if (success) {
 					new Notice(`Note sent to ${selectedBot.name}`);
 				}

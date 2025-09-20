@@ -30,7 +30,7 @@ export class Telegram {
 		}
 	}
 
-	private async makeApiRequest(token: string, method: string, body?: any): Promise<any> {
+	private async makeApiRequest(token: string, method: string, body?: any, headers?: any): Promise<any> {
 		const url = `https://api.telegram.org/bot${token}/${method}`;
 
 		try {
@@ -38,6 +38,7 @@ export class Telegram {
 				url,
 				method: "POST",
 				body,
+				headers,
 			});
 
 			this.log(`API request to ${method}`, { status: response.status, body });
@@ -48,7 +49,7 @@ export class Telegram {
 
 			const data = response.json;
 			if (!data.ok) {
-				throw new Error(`Telegram API error: ${data.description} (code: ${data.error_code})`);
+				throw new Error(`Telegram API error: ${data.description} (code: ${data.error_code}) error ${data}`);
 			}
 
 			return data.result;
@@ -89,7 +90,8 @@ export class Telegram {
 				JSON.stringify({
 					chat_id: botConfig.chatId,
 					text: testMessage,
-				})
+				}),
+				{ "Content-type": "application/json" }
 			);
 			this.log("Test message sent successfully");
 
@@ -105,10 +107,13 @@ export class Telegram {
 			let errorMessage = "Unknown error occurred";
 
 			if (error.message) {
-				if (error.message.includes("401")) {
-					errorMessage = "Invalid bot token";
-				} else if (error.message.includes("400")) {
-					if (error.message.includes("chat not found")) {
+				if (error.message.includes("400")) {
+					if (error.message.includes("can't parse entities")) {
+						errorMessage = "Message formatting error (MarkdownV2 parse error)";
+						this.logError("Try escaping special characters or removing parse_mode", error);
+					} else if (error.message.includes("message is too long")) {
+						errorMessage = "Message is too long (max 4096 characters)";
+					} else if (error.message.includes("chat not found")) {
 						errorMessage = "Chat ID not found or bot not added to the chat";
 					} else {
 						errorMessage = error.message;
@@ -123,24 +128,27 @@ export class Telegram {
 		}
 	}
 
-	async sendMessage(botConfig: TelegramBotConfig, message: string): Promise<boolean> {
-		if (!botConfig.isEnabled) {
-			this.log(`Bot ${botConfig.name} is disabled, skipping send`);
+	async sendMessage(bot: TelegramBotConfig, message: string): Promise<boolean> {
+		if (!bot.isEnabled) {
+			this.log(`Bot ${bot.name} is disabled, skipping send`);
 			return false;
 		}
 
-		this.log(`Sending message via bot: ${botConfig.name}`);
+		this.log(`Sending message via bot: ${bot.name}`);
+
+		console.log(message);
 
 		try {
 			await this.makeApiRequest(
-				botConfig.token,
+				bot.token,
 				"sendMessage",
 				JSON.stringify({
-					chat_id: botConfig.chatId,
+					chat_id: bot.chatId,
 					text: message,
-					parse_mode: "Markdown",
+					parse_mode: "MarkdownV2",
 					disable_web_page_preview: true,
-				})
+				}),
+				{ "Content-Type": "application/json" }
 			);
 
 			this.log("Message sent successfully");
@@ -153,7 +161,7 @@ export class Telegram {
 			}
 
 			this.logError(`Send message failed: ${errorMessage}`, error);
-			new Notice(`Failed to send to ${botConfig.name}: ${errorMessage}`);
+			new Notice(`Failed to send to ${bot.name}: ${errorMessage}`);
 			return false;
 		}
 	}
@@ -163,8 +171,6 @@ export class Telegram {
 			if (mediaFiles.length === 0) {
 				return false;
 			}
-
-			console.log(mediaFiles);
 
 			if (mediaFiles.length === 1) {
 				// Отправляем один файл
@@ -182,9 +188,8 @@ export class Telegram {
 				return true;
 			}
 		} catch (error) {
-			if (this.enableLogging) {
-				console.error("Error sending media files:", error);
-			}
+			this.logError("Error sending media files:");
+			new Notice(`Failed to send to ${bot.name}: ${error}`);
 			return false;
 		}
 	}
@@ -193,7 +198,7 @@ export class Telegram {
 		const baseUrl = `https://api.telegram.org/bot${bot.token}`;
 		let endpoint = "";
 
-		// Определяем endpoint в зависимости от типа файла
+		// Determine the endpoint depending on the file type
 		switch (mediaFile.type) {
 			case "photo":
 				endpoint = "/sendPhoto";
@@ -211,7 +216,7 @@ export class Telegram {
 		const formData = new FormData();
 		formData.append("chat_id", bot.chatId);
 
-		// Определяем имя поля для файла
+		// Define the field name for the file
 		const fileField =
 			mediaFile.type === "photo"
 				? "photo"
@@ -221,13 +226,13 @@ export class Telegram {
 						? "audio"
 						: "document";
 
-		// Создаем Blob из данных файла
+		// create Blob
 		const blob = new Blob([mediaFile.data]);
 		formData.append(fileField, blob, mediaFile.name);
 
 		if (caption) {
 			formData.append("caption", caption);
-			formData.append("parse_mode", "Markdown");
+			formData.append("parse_mode", "MarkdownV2");
 		}
 
 		const response = await fetch(baseUrl + endpoint, {
@@ -237,9 +242,7 @@ export class Telegram {
 
 		const result = await response.json();
 
-		if (this.enableLogging) {
-			console.log("Single media response:", result);
-		}
+		this.log("Single media response:", result);
 
 		return result.ok;
 	}
@@ -253,20 +256,18 @@ export class Telegram {
 		mediaFiles.forEach((file, index) => {
 			const attachName = `attach://file${index}`;
 
-			// Добавляем файл в FormData
 			const blob = new Blob([file.data]);
 			formData.append(`file${index}`, blob, file.name);
 
-			// Создаем объект медиа
 			const mediaItem: any = {
 				type: file.type,
 				media: attachName,
 			};
 
-			// Добавляем caption только к первому элементу
+			// Add caption only to the first element
 			if (index === 0 && caption) {
 				mediaItem.caption = caption;
-				mediaItem.parse_mode = "Markdown";
+				mediaItem.parse_mode = "MarkdownV2";
 			}
 
 			media.push(mediaItem);
@@ -282,9 +283,7 @@ export class Telegram {
 
 		const result = await response.json();
 
-		if (this.enableLogging) {
-			console.log("Media group response:", result);
-		}
+		this.log("Media group response:", result);
 
 		return result.ok;
 	}
