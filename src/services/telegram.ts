@@ -136,8 +136,6 @@ export class Telegram {
 
 		this.log(`Sending message via bot: ${bot.name}`);
 
-		console.log(message);
-
 		try {
 			await this.makeApiRequest(
 				bot.token,
